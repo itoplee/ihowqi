@@ -1,0 +1,491 @@
+{layout name="layout" /}
+<input type="hidden" v-model="base" value="{$base}">
+<div class="ihq-con-sidebar">
+    <div class="ihq-si-top">项目管理</div>
+    <ul>
+        <li v-for="m in menus" :class="{'active': mindex === $index}" v-on:click="changem($index, m.component)">{{m.text}}</li>
+    </ul>
+</div>
+<div class="ihq-con-body">
+    <component :is="currentView" v-bind:project-id="projectId" transition="fade" transition-mode="out-in">
+    </component>
+</div>
+<!-- 项目报表 -->
+<template id="project-chart">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <span class="h5-back" @click="add"><i class="icon-menu">&#xe606;</i>添加项目</span>
+        </div>
+        <div class="ihq-whole">
+            <table class="ihq-whole-table">
+                <tr>
+                    <td colspan="5"><label class="ihq-whole-table-text">未归档</label>{{obj.total - obj.finish}}</td>
+                    <td><label class="ihq-whole-table-text">已归档</label>{{obj.finish}}</td>
+                </tr>
+                <tr>
+                    <td><label class="ihq-whole-table-text">未开始</label>{{obj.unstart}}</td>
+                    <td><label class="ihq-whole-table-text">正在进行</label>{{obj.start}}</td>
+                    <td><label class="ihq-whole-table-text">挂起</label>{{obj.stop}}</td>
+                    <td><label class="ihq-whole-table-text">已完成</label>{{obj.compete}}</td>
+                    <td><label class="ihq-whole-table-text">结算中</label>{{obj.audit}}</td>
+                    <td><label class="ihq-whole-table-text">已归档</label>{{obj.finish}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</template>
+<!-- 未归档项目列表 -->
+<template id="project-list">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <select class="h5-select" v-model="state">
+                <option value="-1">---项目状态---</option>
+                <option value="0">未开始</option>
+                <option value="1">正在进</option>
+                <option value="2">挂起</option>
+                <option value="3">完成</option>
+                <option value="4">结算</option>
+            </select>
+            <input class="h5-input" type="text" placeholder="请输入项目名称" v-model="keyword">
+            <span class="h5-span" @click="search"><i class="icon-menu">&#xe607;</i>搜索</span>
+        </div>
+        <div class="ihq-div">
+            <table class="ihq-projects">
+                <thead>
+                    <tr>
+                        <td class="odd name">项目名称</td>
+                        <td class="odd time">项目时长(分钟)</td>
+                        <td class="odd type">项目类型</td>
+                        <td class="odd end">项目状态</td>
+                        <td class="odd end">调查数量(份)</td>
+                        <td class="odd end">已完成(份)</td>
+                        <td class="odd op">操作</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="p in list">
+                        <td class="name" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.name}}</td>
+                        <td class="time" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.use_time | timeFilter}}</td>
+                        <td class="type" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.type_name}}</td>
+                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.state | stateFilter}}</td>
+                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.amount}}</td>
+                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.finishCount}}
+                            <div class="process" style="width: {{p.amount > 0 ? (p.finishCount / p.amount).toFixed(2) * 100 : 0}}%;"></div>
+                        </td>
+                        <td class="op" :class="{'odd': (($index + 1) % 2 === 0)}">
+                            <a @click="process(p.id)">详情</a>
+                            <a @click="hang(p, parseInt(p.state,10) === 0)" :class="{'enable': parseInt(p.state,10) === 0}">{{parseInt(p.state,10) === 2 ? "恢复" : "挂起"}}</a>
+                            <a @click="change(p.id)">修改</a>
+                            <a @click="outsource(p.id)">外包</a>
+                            <a class="delete" @click="delete(p.id, parseInt(p.state,10) > 0)" :class="{'enable': parseInt(p.state,10) > 0}">删除</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <paginate :index="0" :row="pageRowCount" :total="total"></paginate>
+        </div>
+    </div>
+</template>
+<!-- 已归档项目列表 -->
+<template id="project-list-finish">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <input class="h5-input" type="text" placeholder="请输入项目名称" v-model="keyword">
+            <span class="h5-span" @click="search"><i class="icon-menu">&#xe607;</i>搜索</span>
+        </div>
+        <div class="ihq-div">
+            <table class="ihq-projects">
+                <thead>
+                    <tr>
+                        <td class="odd name">项目名称</td>
+                        <td class="odd time">项目时长(分钟)</td>
+                        <td class="odd type">项目类型</td>
+                        <td class="odd end">开始时间</td>
+                        <td class="odd end">结束时间</td>
+                        <td class="odd end">调查数量(份)</td>
+                        <td class="odd op op2">操作</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="p in list">
+                        <td class="name" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.name}}</td>
+                        <td class="time" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.use_time | timeFilter}}</td>
+                        <td class="type" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.type_name}}</td>
+                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.start_time}}</td>
+                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.end_time}}</td>
+                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.amount}}</td>
+                        <td class="op op2" :class="{'odd': (($index + 1) % 2 === 0)}">
+                            <a @click="chart(p.id)">查看报表</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <paginate :index="0" :row="pageRowCount" :total="total"></paginate>
+        </div>
+    </div>
+</template>
+<!-- 添加/修改项目 -->
+<template id="project-add" transition-mode="out-in">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <span class="h5-back" @click="back"><i class="icon-menu">&#xe608;</i>返回</span>
+            <label class="h5-label">添加项目</label>
+        </div>
+        <input type="hidden" value="{{projectId}}" v-model="project.id">
+        <dl class="ihq-add-dl">
+            <dt>项目类型：</dt>
+            <dd>
+                <select v-model="project.typeId">
+                    <option v-for="t in types" value="{{t.id}}">{{t.name}}</option>
+                </select>
+            </dd>
+            <dt>项目时长：</dt>
+            <dd>
+                <input class="input2" type="text" v-model="project.time"> 秒
+            </dd>
+            <dt>问卷数量：</dt>
+            <dd>
+                <input class="input2" type="text" v-model="project.amount"> 份
+            </dd>
+            <dt>项目时间：</dt>
+            <dd>
+                <input class="Wdate input2" type="text" onClick="WdatePicker()" v-model="project.start">
+                <i class="icon-menu" style="margin: 0 10px">&#xe604;</i>
+                <input class="Wdate input2" type="text" onClick="WdatePicker()" v-model="project.end">
+            </dd>
+            <dt>项目名称：</dt>
+            <dd>
+                <input class="input" type="text" v-model="project.name" disabled='{{project.id > 0 ? true : false}}'>
+            </dd>
+            <dt>启用多链接：</dt>
+            <dd>
+                <input class="ihq-check" type="checkbox" v-model="project.muiltyLink">
+            </dd>
+            <dt v-show="!project.muiltyLink">问卷地址：</dt>
+            <dd v-show="!project.muiltyLink">
+                <input class="input" type="text" v-model="project.link">
+            </dd>
+            <dt v-show="project.muiltyLink">问卷链接上传：</dt>
+            <dd v-show="project.muiltyLink">
+                <p class="ihq-up">
+                    <input class="ihq-up-file" type="file" id="file1" name="file" />
+                    <input class="ihq-up-btn" type="button" value="选择文件" id="file2" />
+                </p>
+                <label>{{project.fileName}}</label>
+                <label>共：{{linkCount}} 条链接</label>
+            </dd>
+            <dt>完成链接：</dt>
+            <dd>
+                <input class="input" type="text" value="{{project.compete}}" disabled="true">
+            </dd>
+            <dt>甄别链接：</dt>
+            <dd>
+                <input class="input" type="text" value="{{project.refuse}}" disabled="true">
+            </dd>
+            <dt>配额已满链接：</dt>
+            <dd>
+                <input class="input" type="text" value="{{project.full}}" disabled="true">
+            </dd>
+            <dt>&nbsp;</dt>
+            <dd>
+                <div class="ihq-btn" v-on:click="add">保存</div>
+            </dd>
+        </dl>
+    </div>
+</template>
+<!-- 项目外包 -->
+<template id="project-outsource">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <span class="h5-back" @click="back"><i class="icon-menu">&#xe608;</i>返回</span>
+            <label class="h5-label">项目外包</label>
+        </div>
+        <dl class="ihq-add-dl">
+            <dt>外包公司：</dt>
+            <dd>
+                <select v-model="outsource.companyId" @change="getProjectCompany">
+                    <option v-for="c in companys" value="{{c.id}}">{{c.name}}</option>
+                </select>
+            </dd>
+            <dt>问卷数量：</dt>
+            <dd>
+                <input class="input2" type="text" v-model="outsource.amount"> 份
+            </dd>
+            <dt>外包完成链接：</dt>
+            <dd>
+                <input class="input" type="text" v-model="outsource.compete">
+            </dd>
+            <dt>外包甄别链接：</dt>
+            <dd>
+                <input class="input" type="text" v-model="outsource.refuse">
+            </dd>
+            <dt>外包配额已满链接：</dt>
+            <dd>
+                <input class="input" type="text" v-model="outsource.full">
+            </dd>
+            <dt>&nbsp;</dt>
+            <dd>
+                <div class="ihq-btn" @click="addProjectCompany">保存</div>
+            </dd>
+        </dl>
+    </div>
+</template>
+<!-- 项目进度 -->
+<template id="project-process">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <span class="h5-back" @click="back"><i class="icon-menu">&#xe608;</i>返回</span>
+            <span class="h5-back" @click="refush"><i class="icon-menu">&#xe60c;</i>刷新</span>
+            <label class="h5-label">项目详情</label>
+        </div>
+        <div style="margin: 10px;">
+            <table class="ihq-chart-link">
+                <tr>
+                    <td class="td">项目名称</td>
+                    <td>{{project.name}}</td>
+                </tr>
+                <tr>
+                    <td class="td">项目日期</td>
+                    <td>{{project.start_time}} ~ {{project.end_time}}</td>
+                </tr>
+                <tr v-show="parseInt(project.is_muilty_link, 10) === 1">
+                    <td class="td">可用链接数</td>
+                    <td>{{linkCount}}</td>
+                </tr>
+                <tr>
+                    <td class="td">内部会员链接</td>
+                    <td><a href="javascript:void(0)">{{innerLink}}</a></td>
+                </tr>
+                <tr v-if="outLinks.length > 0">
+                    <td class="td">外部会员链接</td>
+                    <td>
+                        <div v-for="c in outLinks">
+                            <p>{{c.name}}</p>
+                            <a href="javascript:void(0)">{{c.link}}</a>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td">完成链接</td>
+                    <td><a href="javascript:void(0)">{{project.link_compete}}会员id</a></td>
+                </tr>
+                <tr>
+                    <td class="td">甄别链接</td>
+                    <td><a href="javascript:void(0)">{{project.link_refuse}}会员id</a></td>
+                </tr>
+                <tr>
+                    <td class="td">配额已满链接</td>
+                    <td><a href="javascript:void(0)">{{project.link_full}}会员id</a></td>
+                </tr>
+            </table>
+        </div>
+        <div style="overflow: hidden;">
+            <div class="ihq-chart" v-for="c in list">
+                <table class="ihq-chart-table">
+                    <tr>
+                        <td class="ihq-chat-table-td">名称</td>
+                        <td colspan="6" class="ihq-chart-company">{{c.name}}</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="7" class="ihq-chat-table-td">总数</td>
+                        <td class="ihq-chart-num" rowspan="7" style="width: 40px;">{{c.amount}}</td>
+                        <td class="ihq-chat-table-td">完成率</td>
+                        <td class="ihq-chart-num">{{c.compete | percentFilter c.amount}}</td>
+                        <td class="ihq-chat-table-td">MAX</td>
+                        <td class="ihq-chart-num" colspan="2">{{c.max}}
+                            <label style="float: right;">（分钟）</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ihq-chat-table-td">掉线率</td>
+                        <td class="ihq-chart-num">{{c.unfinish | percentFilter c.partIn}}</td>
+                        <td class="ihq-chat-table-td">MIN</td>
+                        <td class="ihq-chart-num" colspan="2">{{c.min}}
+                            <label style="float: right;">（分钟）</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ihq-chat-table-td">IR</td>
+                        <td class="ihq-chart-num">{{c.compete | percentFilter c.compete c.refuse}}</td>
+                        <td class="ihq-chat-table-td">AVG</td>
+                        <td class="ihq-chart-num" colspan="2">{{c.avg}}
+                            <label style="float: right;">（分钟）</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td rowspan="4" class="ihq-chat-table-td">参与</td>
+                        <td class="ihq-chart-num" colspan="4">{{c.partIn}}</td>
+                    </tr>
+                    <tr>
+                        <td class="ihq-chat-table-td">完成</td>
+                        <td class="ihq-chat-table-td">甄别</td>
+                        <td class="ihq-chat-table-td">配额</td>
+                        <td class="ihq-chat-table-td">掉线</td>
+                    </tr>
+                    <tr>
+                        <td class="ihq-chart-num">{{c.compete}}</td>
+                        <td class="ihq-chart-num">{{c.refuse}}</td>
+                        <td class="ihq-chart-num">{{c.full}}</td>
+                        <td class="ihq-chart-num">{{c.unfinish}}</td>
+                    </tr>
+                    <tr>
+                        <td class="ihq-chart-num">{{c.compete | percentFilter c.partIn}}</td>
+                        <td class="ihq-chart-num">{{c.refuse | percentFilter c.partIn}}</td>
+                        <td class="ihq-chart-num">{{c.full | percentFilter c.partIn}}</td>
+                        <td class="ihq-chart-num">{{c.unfinish | percentFilter c.partIn}}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="ihq-chart-div" id="{{c.domId}}"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</template>
+<!-- 项目报表（单个项目） -->
+<template id="project-chart-one">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <span class="h5-back" @click="back"><i class="icon-menu">&#xe608;</i>返回</span>
+            <label class="h5-label">项目报表</label>
+        </div>
+    </div>
+</template>
+<!-- 项目类型 -->
+<template id="project-type">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <input class="h5-input" type="text" placeholder="请输入项目类型名称" v-model="keyword">
+            <span class="h5-span" @click="search"><i class="icon-menu">&#xe607;</i>搜索</span>
+            <input class="h5-input h5-add" type="text" placeholder="请输入项目类型名称" v-model="name">
+            <span class="h5-span h5-btn" @click="addType"><i class="icon-menu">&#xe606;</i>添加</span>
+        </div>
+        <table class="ihq-project-type">
+            <tr>
+                <td class="type">
+                    <table class="ihq-table-edit">
+                        <thead>
+                            <tr>
+                                <td class="id">id</td>
+                                <td class="name">名称</td>
+                                <td class="op" style="width: 80px;">操作</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="t in list">
+                                <td class="id">{{t.id}}</td>
+                                <td class="name edit">
+                                    <input type="text" v-model="t.name" @blur="updateType(t.id, t.name)">
+                                </td>
+                                <td class="op">
+                                    <a @click="chooseType(t.id, t.name)" style="margin-right: 10px; color: #0f88eb;">积分</a>
+                                    <a @click="deleteType(t.id)">删除</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="ihq-paginate-empty" v-show="list.length < 1">没有记录</div>
+                </td>
+                <td class="score">
+                    <div v-show="showScore">
+                        <div class="ihq-score-top">
+                            <label>当前项目类型：{{typeName}}</label>
+                            <span class="ihq-btn" @click="showAdd = !showAdd;"><i class="icon-menu">&#xe609;</i>添加</span>
+                        </div>
+                        <div class="ihq-project-score" v-show="showAdd">
+                            <input class="input" type="text" placeholder="开始时长(分钟)" v-model="min">
+                            <input class="input" type="text" placeholder="结束时长(分钟)" v-model="max">
+                            <input class="input" type="text" placeholder="奖励积分" v-model="score">
+                            <span class="ihq-btn btn" @click="addScore"><i class="icon-menu">&#xe60d;</i>保存</span>
+                        </div>
+                        <table class="ihq-table-edit">
+                            <thead>
+                                <tr>
+                                    <td class="id">id</td>
+                                    <td class="name">开始时长(分钟)</td>
+                                    <td class="name">结束时长(分钟)</td>
+                                    <td class="name">奖励积分</td>
+                                    <td class="op">操作</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="t in scoreList">
+                                    <td class="id">{{t.id}}</td>
+                                    <td class="name edit">
+                                        <input type="text" v-model="t.min_time" @blur="updateScore(t)">
+                                    </td>
+                                    <td class="name edit">
+                                        <input type="text" v-model="t.max_time" @blur="updateScore(t)">
+                                    </td>
+                                    <td class="name edit">
+                                        <input type="text" v-model="t.score" @blur="updateScore(t)">
+                                    </td>
+                                    <td class="op"><a @click="deleteScore(t.id)">删除</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="ihq-paginate-empty" v-show="scoreList.length < 1">没有记录</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</template>
+<!-- 外包公司 -->
+<template id="project-company">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <input class="h5-input" type="text" placeholder="请输入公司名称" v-model="keyword">
+            <span class="h5-span" @click="search"><i class="icon-menu">&#xe607;</i>搜索</span>
+            <input class="h5-input h5-add" type="text" placeholder="请输入公司名称" v-model="name">
+            <span class="h5-span h5-btn" @click="add"><i class="icon-menu">&#xe606;</i>添加</span>
+        </div>
+        <div class="ihq-company">
+            <table class="ihq-table-edit">
+                <thead>
+                    <tr>
+                        <td class="id">id</td>
+                        <td class="name">公司名称</td>
+                        <td class="compete">完成链接</td>
+                        <td class="refuse">甄别链接</td>
+                        <td class="full">配额已满链接</td>
+                        <td class="op">操作</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="c in list">
+                        <td class="id">{{c.id}}</td>
+                        <td class="edit">
+                            <input type="text" v-model="c.name" title="{{c.name}}" @blur="edit(c)">
+                        </td>
+                        <td class="edit">
+                            <input type="text" v-model="c.link_compete" title="{{c.link_compete}}" @blur="edit(c)">
+                        </td>
+                        <td class="edit">
+                            <input type="text" v-model="c.link_refuse" title="{{c.link_refuse}}" @blur="edit(c)">
+                        </td>
+                        <td class="edit">
+                            <input type="text" v-model="c.link_full" title="{{c.link_full}}" @blur="edit(c)">
+                        </td>
+                        <td class="op"><a @click="delete(c.id)">删除</a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="ihq-paginate-empty" v-show="list.length < 1">没有记录</div>
+        </div>
+    </div>
+</template>
+<!-- 分页 -->
+<template id="paginate">
+    <ul class="ihq-paginate" v-show="total > 0">
+        <li class="li" @click="first" :class="{'enable': index === 0}">首页</li>
+        <li class="li" @click="prev" :class="{'enable': index === 0}">上一页</li>
+        <li class="li" v-for="item in items" @click="change(item)" :class="{'active': (index + 1) === item}"> {{item}}</li>
+        <li class="li" @click="next" :class="{'enable': index === (page - 1)}">下一页</li>
+        <li class="li" @click="last" :class="{'enable': index === (page - 1)}">尾页</li>
+        <li>&nbsp;&nbsp;当前{{index + 1}}/{{page}}页&nbsp;&nbsp;&nbsp;&nbsp;共{{total}}条记录</li>
+    </ul>
+    <div class="ihq-paginate-empty" v-show="total < 1">没有记录</div>
+</template>

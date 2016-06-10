@@ -1,0 +1,269 @@
+/* topbar */
+
+.ihq-topbar {
+    position: fixed;
+    width: 100%;
+    height: 50px;
+    background: #09C;
+    z-index: 101;
+}
+
+
+/* body */
+
+.ihq-body {
+    position: absolute;
+    width: 100%;
+    top: 50px;
+    bottom: 0px;
+    background-color: #000;
+    z-index: 100;
+}
+
+
+/* sidebar */
+
+.ihq-sidebar {
+    width: 140px;
+    position: fixed;
+    top: 50px;
+    bottom: 0px;
+    background-color: #293038;
+    z-index: 102;
+    overflow-x: hidden;
+    transition: width .3s;
+}
+
+.ihq-sidebar li {
+    display: block;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    color: #f2f2f2;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.ihq-sidebar li .ihq-si-icon {
+    float: left;
+    margin: 10px;
+    font-size: 18px;
+}
+
+.ihq-sidebar li:hover {
+    background-color: #3a4656;
+}
+
+.ihq-sidebar .active {
+    background-color: #0099cc;
+}
+
+.ihq-si-top {
+    height: 30px;
+    width: 140px;
+    background-color: #394555;
+    color: #aeb9c2;
+    text-align: center;
+    line-height: 30px !important;
+    font-size: 12px;
+    user-select: none;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+
+/* context */
+
+.ihq-context {
+    width: auto;
+    position: absolute;
+    top: 0px;
+    left: 140px;
+    bottom: 0px;
+    right: 0px;
+    overflow: hidden;
+    background: #eaedf1;
+    transition: left .3s;
+}
+
+.ihq-con-sidebar {
+    width: 120px;
+    background-color: #eaedf1;
+}
+
+.ihq-con-sidebar .ihq-si-top {
+    height: auto;
+    background-color: #eaedf1;
+    text-align: left;
+    margin-left: 25px;
+    color: #333;
+    font-weight: 700;
+    width: auto;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.ihq-con-sidebar li {
+    height: 40px;
+    line-height: 40px;
+    padding-left: 30px;
+    color: #333;
+    cursor: pointer;
+}
+
+.ihq-con-sidebar li:hover {
+    background-color: #fff;
+}
+
+.ihq-con-sidebar .active {
+    background-color: #fff;
+}
+
+.ihq-con-body {
+    position: absolute;
+    width: auto;
+    top: 0px;
+    bottom: 0px;
+    left: 120px;
+    right: 0px;
+    overflow: hidden;
+    overflow-y: auto;
+    -o-transition: all 0.2s ease;
+    -ms-transition: all 0.2s ease;
+    -moz-transition: all 0.2s ease;
+    -webkit-transition: all 0.2s ease;
+    background-color: #fff;
+}
+
+.ihq-con-b-topbar {
+    margin: 8px;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+    overflow: hidden;
+}
+
+.ihq-con-b-topbar .h5-label {
+    display: inline-block;
+    float: left;
+    line-height: 32px;
+}
+
+.ihq-con-b-topbar .h5-select {
+    float: left;
+    width: 120px;
+    height: 32px;
+    line-height: 32px;
+    margin-right: 10px;
+}
+
+.ihq-con-b-topbar .h5-input {
+    float: left;
+    width: 500px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #ccc;
+    outline: 0;
+    padding: 0 10px;
+}
+
+.ihq-con-b-topbar .h5-input:focus {
+    border: 1px solid #88B7E0;
+}
+
+.ihq-con-b-topbar .h5-span {
+    display: inline-block;
+    float: left;
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #ccc;
+    border-left: 0;
+    border-radius: 0 4px 4px 0;
+    background-color: #f7f7f7;
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#f7f7f7), to(#f2f2f2));
+    cursor: pointer;
+}
+
+.ihq-con-b-topbar .h5-span .icon-menu {
+    float: left;
+}
+
+.ihq-con-b-topbar .h5-back {
+    display: inline-block;
+    float: left;
+    height: 30px;
+    line-height: 30px;
+    margin-right: 10px;
+    padding: 0 5px;
+    border: 1px solid #2091fc;
+    background-color: #28b5fd;
+    color: #fff;
+    cursor: pointer;
+}
+
+.ihq-con-b-topbar .h5-back .icon-menu {
+    float: left;
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+.ihq-con-b-topbar .h5-add {
+    width: 200px;
+    margin-left: 50px;
+}
+
+.ihq-con-b-topbar .h5-btn {
+    border: 1px solid #2091fc;
+    background-color: #28b5fd;
+    background: -webkit-gradient(linear,0 0,0 100%,from(#28b5fd),to(#2091fc));
+    color: #fff;
+}
+
+.ihq-con-b-context {
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.ihq-btn {
+    display: inline-block;
+    padding: 0;
+    width: 100%;
+    font-size: 15px;
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, .2);
+    background: #0f88eb;
+    outline: 0;
+    cursor: pointer;
+    box-shadow: none;
+    border: 0;
+    border-radius: 3px;
+    line-height: 41px;
+    color: #fff;
+}
+
+
+/* 在线图标 */
+@font-face {
+  font-family: 'iconfont';
+  src: url('//at.alicdn.com/t/font_1465456596_7878358.eot'); /* IE9*/
+  src: url('//at.alicdn.com/t/font_1465456596_7878358.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('//at.alicdn.com/t/font_1465456596_7878358.woff') format('woff'), /* chrome、firefox */
+  url('//at.alicdn.com/t/font_1465456596_7878358.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+  url('//at.alicdn.com/t/font_1465456596_7878358.svg#iconfont') format('svg'); /* iOS 4.1- */
+}
+                    
+.icon-mutilinemode {
+    font-family: "iconfont";
+    font-size: 16px;
+    font-style: normal;
+}
+
+.icon-menu {
+    font-family: "iconfont";
+    margin-left: 14px;
+    margin-right: 14px;
+    font-size: 18px;
+    font-style: normal;
+}

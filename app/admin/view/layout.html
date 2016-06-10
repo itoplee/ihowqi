@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>爱好奇管理平台</title>
+    <link rel="stylesheet" href="{$css}/reset.css">
+    <link rel="stylesheet" href="{$css}/animate.min.css">
+    <link rel="stylesheet" href="{$css}/admin/common.css">
+    <link rel="stylesheet" href="{$css}/admin/{$style}.css">
+</head>
+
+<body>
+    <div class="ihq-topbar">
+        <a href="/"><img src={$img. "/logo2.png"} style="height: 40px; margin: 5px;"></a>
+        <a href="../login/logout" style="float: right; margin: 15px; text-decoration: none; color: #fff;">退出</a>
+    </div>
+    <div class="ihq-body">
+        <div class="ihq-sidebar">
+            <div class="ihq-si-top">
+                <i class="icon-menu">&#xe601;</i>
+            </div>
+            <ul>
+                <li class="active"><i class="icon-menu">&#xe603;</i>项目管理</li>
+                <li><i class="icon-menu">&#xe600;</i>用户管理</li>
+            </ul>
+        </div>
+        <div class="ihq-context" id="ihq-context">
+            {__CONTENT__}
+        </div>
+    </div>
+    <script src="{$js}/lib/jquery-2.2.4.min.js" type="text/javascript"></script>
+    <script src="{$js}/lib/vue.min.js" type="text/javascript"></script>
+    <script src="{$js}/lib/my97datepicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="{$js}/lib/echarts.min.js" type="text/javascript"></script>
+    <script src="{$js}/lib/ajaxfileupload.js" type="text/javascript"></script>
+    <script src="{$js}/app/admin/{$ctrl}.js" type="text/javascript"></script>
+</body>
+
+</html>

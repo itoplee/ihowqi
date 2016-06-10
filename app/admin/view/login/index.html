@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>爱好奇管理平台</title>
+    <link rel="stylesheet" href="{$css}/reset.css">
+    <style type="text/css">
+    #particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .box {
+        position: fixed;
+        z-index: 5;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: table;
+    }
+    
+    .wrap {
+        display: table-cell;
+        vertical-align: middle;
+    }
+    
+    form {
+        width: 300px;
+        margin: 0 auto;
+    }
+    
+    form label {
+        display: block;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        color: #f00;
+    }
+    
+    form .div {
+        border: 1px solid #d5d5d5;
+        border-radius: 3px;
+    }
+    
+    form .input {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: #fff;
+        color: #555;
+        padding: 12px 10px;
+        width: 100%;
+        box-sizing: border-box;
+        outline: 0;
+    }
+    
+    form input[type="submit"] {
+        display: block;
+        padding: 0;
+        width: 100%;
+        font-size: 15px;
+        color: #fff;
+        text-align: center;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, .2);
+        background: #0f88eb;
+        outline: 0;
+        cursor: pointer;
+        box-shadow: none;
+        border: 0;
+        border-radius: 3px;
+        line-height: 41px;
+        color: #fff;
+    }
+    
+    form hr {
+        margin: 1px 0 0 0;
+    }
+    
+    form .logo {
+        height: 50px;
+        display: block;
+        margin: 0 auto 10px auto;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="wrap">
+            <form action="login" method="post">
+                <img class="logo" src={$img. "/logo.png"}>
+                <div class="div">
+                    <input class="input" onkeypress="" ="change()" type="text" name="account" value="{$account}" placeholder="手机号或邮箱">
+                    <hr>
+                    <input class="input" onkeypress="change()" type="password" name="pwd" placeholder="密码">
+                </div>
+                <label id="error">{$error}</label>
+                <input type="submit" value="登录">
+            </form>
+        </div>
+    </div>
+    <div id="particles"></div>
+    <script type="text/javascript" src="{$js}/lib/particles.min.js"></script>
+    <script type="text/javascript">
+    function change() {
+        document.getElementById("error").innerHTML = "";
+    }
+    particlesJS('particles',
+        {
+            particles: {
+                number: {
+                    value: 20,
+                    density: {
+                        enable: !0,
+                        value_area: 1E3
+                    }
+                },
+                color: {
+                    value: "#e1e1e1"
+                },
+                shape: {
+                    type: "circle",
+                    stroke: {
+                        width: 0,
+                        color: "#000000"
+                    },
+                    polygon: {
+                        nb_sides: 5
+                    },
+                    image: {
+                        src: "img/github.svg",
+                        width: 100,
+                        height: 100
+                    }
+                },
+                opacity: {
+                    value: .5,
+                    random: !1,
+                    anim: {
+                        enable: !1,
+                        speed: 1,
+                        opacity_min: .1,
+                        sync: !1
+                    }
+                },
+                size: {
+                    value: 15,
+                    random: !0,
+                    anim: {
+                        enable: !1,
+                        speed: 180,
+                        size_min: .1,
+                        sync: !1
+                    }
+                },
+                line_linked: {
+                    enable: !0,
+                    distance: 650,
+                    color: "#cfcfcf",
+                    opacity: .26,
+                    width: 1
+                },
+                move: {
+                    enable: !0,
+                    speed: 2,
+                    direction: "none",
+                    random: !0,
+                    straight: !1,
+                    out_mode: "out",
+                    bounce: !1,
+                    attract: {
+                        enable: !1,
+                        rotateX: 600,
+                        rotateY: 1200
+                    }
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: {
+                        enable: !1,
+                        mode: "repulse"
+                    },
+                    onclick: {
+                        enable: !1,
+                        mode: "push"
+                    },
+                    resize: !0
+                },
+                modes: {
+                    grab: {
+                        distance: 400,
+                        line_linked: {
+                            opacity: 1
+                        }
+                    },
+                    bubble: {
+                        distance: 400,
+                        size: 40,
+                        duration: 2,
+                        opacity: 8,
+                        speed: 3
+                    },
+                    repulse: {
+                        distance: 200,
+                        duration: .4
+                    },
+                    push: {
+                        particles_nb: 4
+                    },
+                    remove: {
+                        particles_nb: 2
+                    }
+                }
+            },
+            retina_detect: !0
+        }
+
+    );
+    </script>
+</body>
+
+</html>
