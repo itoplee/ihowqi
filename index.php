@@ -24,6 +24,6 @@ define('PARAM_KEY', 'ihq_u');
 // 会员访问基础链接
 define('LINK_BASE_KEY', 'http://localhost/ihowqi/index.php/');
 // 开启调试模式
-define('APP_DEBUG', false);
+define('APP_DEBUG', true);
 // 加载框架引导文件
 require __DIR__ . '/thinkphp/start.php';

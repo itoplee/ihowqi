@@ -13,6 +13,15 @@ class AccountProject
         	->count();
     }
 
+    // 获取项目参与记录数
+    public function getPartInCount($projectId)
+    {       
+        return db("account_project")
+            ->where('project_id', $projectId)
+            ->where('state', '>', 0)
+            ->count();
+    }
+
     // 获取用户是否参与过项目
     public function getUserRecord($projectId, $userId) 
     {
@@ -26,7 +35,7 @@ class AccountProject
     public function getUseTimeDiff($projectId)
     {       
         return db("account_project")
-            ->field('id, TIMESTAMPDIFF(MINUTE, start_time, finish_time) AS diff')
+            ->field('id, state, TIMESTAMPDIFF(MINUTE, start_time, finish_time) AS diff')
             ->where('project_id', $projectId)
             ->where('state', '>', 1)
             ->select();

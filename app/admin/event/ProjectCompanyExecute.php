@@ -13,6 +13,15 @@ class ProjectCompanyExecute
             ->count();
     }
 
+    // 获取项目参与记录数
+    public function getPartInCount($projectId)
+    {       
+        return db("project_company_execute")
+            ->where('project_id', $projectId)
+            ->where('state', '>', 0)
+            ->count();
+    }
+
     // 获取项目指定状态的记录数
     public function getCompanyStateCount($projectId, $companyId, $state)
     {       
@@ -47,9 +56,19 @@ class ProjectCompanyExecute
     public function getUseTimeDiff($projectId, $companyId)
     {       
         return db("project_company_execute")
-            ->field('id, TIMESTAMPDIFF(MINUTE, start_time, finish_time) AS diff')
+            ->field('id, state, TIMESTAMPDIFF(MINUTE, start_time, finish_time) AS diff')
             ->where('project_id', $projectId)
             ->where('company_id', $companyId)
+            ->where('state', '>', 1)
+            ->select();
+    }
+
+     // 获取用户完成问卷的时间差
+    public function getUseTimeDiff2($projectId)
+    {       
+        return db("project_company_execute")
+            ->field('id, state, TIMESTAMPDIFF(MINUTE, start_time, finish_time) AS diff')
+            ->where('project_id', $projectId)
             ->where('state', '>', 1)
             ->select();
     }

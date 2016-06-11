@@ -38,7 +38,7 @@
 <template id="project-list">
     <div>
         <div class="ihq-con-b-topbar">
-            <select class="h5-select" v-model="state">
+            <select class="h5-select" v-model="state" @change="search">
                 <option value="-1">---项目状态---</option>
                 <option value="0">未开始</option>
                 <option value="1">正在进</option>
@@ -54,27 +54,45 @@
                 <thead>
                     <tr>
                         <td class="odd name">项目名称</td>
-                        <td class="odd time">项目时长(分钟)</td>
+                        <td class="odd time">项目时长</td>
                         <td class="odd type">项目类型</td>
                         <td class="odd end">项目状态</td>
-                        <td class="odd end">调查数量(份)</td>
-                        <td class="odd end">已完成(份)</td>
+                        <td class="odd end">数量(份)</td>                        
+                        <td class="odd calc">Drop</td>
+                        <td class="odd calc">IR</td>
+                        <td class="odd calc">MAX</td>
+                        <td class="odd calc">MIN</td>
+                        <td class="odd calc">AVG</td>
+                        <td class="odd calc">LOI</td>
                         <td class="odd op">操作</td>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="p in list">
                         <td class="name" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.name}}</td>
-                        <td class="time" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.use_time | timeFilter}}</td>
+                        <td class="time" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.use_time | timeFilter}}&nbsp;min</td>
                         <td class="type" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.type_name}}</td>
-                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.state | stateFilter}}</td>
-                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.amount}}</td>
-                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.finishCount}}
-                            <div class="process" style="width: {{p.amount > 0 ? (p.finishCount / p.amount).toFixed(2) * 100 : 0}}%;"></div>
+                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">
+                            <select v-model="p.state" @change="changeState(p)">
+                                <option value="0">未开始</option>
+                                <option value="1">执行</option>
+                                <option value="2">挂起</option>
+                                <option value="3">完成</option>
+                                <option value="4">结算</option>
+                                <option value="5">归档</option>
+                            </select>
                         </td>
+                        <td class="end" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.competeCount}}/{{p.amount}}
+                            <div class="process" style="width: {{p.amount > 0 ? (p.competeCount / p.amount).toFixed(2) * 100 : 0}}%;"></div>
+                        </td>
+                        <td class="calc" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.dropCount | percentFilter p.partInCount 0}}</td>
+                        <td class="calc" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.competeCount | percentFilter p.competeCount p.refuseCount}}</td>
+                        <td class="calc" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.max}}&nbsp;min</td>
+                        <td class="calc" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.min}}&nbsp;min</td>
+                        <td class="calc" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.avg}}&nbsp;min</td>
+                        <td class="calc" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.loi}}&nbsp;min</td>
                         <td class="op" :class="{'odd': (($index + 1) % 2 === 0)}">
                             <a @click="process(p.id)">详情</a>
-                            <a @click="hang(p, parseInt(p.state,10) === 0)" :class="{'enable': parseInt(p.state,10) === 0}">{{parseInt(p.state,10) === 2 ? "恢复" : "挂起"}}</a>
                             <a @click="change(p.id)">修改</a>
                             <a @click="outsource(p.id)">外包</a>
                             <a class="delete" @click="delete(p.id, parseInt(p.state,10) > 0)" :class="{'enable': parseInt(p.state,10) > 0}">删除</a>
@@ -98,7 +116,7 @@
                 <thead>
                     <tr>
                         <td class="odd name">项目名称</td>
-                        <td class="odd time">项目时长(分钟)</td>
+                        <td class="odd time">项目时长</td>
                         <td class="odd type">项目类型</td>
                         <td class="odd end">开始时间</td>
                         <td class="odd end">结束时间</td>

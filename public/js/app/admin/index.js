@@ -55,7 +55,7 @@ var paginate = {
 // ========================项目报表（所有项目）=============================================
 var projectChart = {
     template: '#project-chart',
-    data: function () {
+    data: function() {
         return {
             obj: {}
         };
@@ -64,16 +64,16 @@ var projectChart = {
         add: function() {
             this.$parent.next("", "projectAdd");
         },
-        getData: function () {
+        getData: function() {
             var _this = this;
-            myPost('../get/getProjectsChart', {}, function (json) {
-                if(json.code === 200){
+            myPost('../get/getProjectsChart', {}, function(json) {
+                if (json.code === 200) {
                     _this.obj = json.data;
                 }
             });
         }
     },
-    ready: function () {
+    ready: function() {
         this.getData();
     }
 };
@@ -110,8 +110,8 @@ var projectList = {
         getList: function(index) {
             var _this = this,
                 param = { page: index, rowCount: _this.pageRowCount };
-            if (this.state >= 0) {
-                param.state = this.state;
+            if (parseInt(this.state, 10) >= 0) {
+                param.state = parseInt(this.state, 10) + 1;
             }
             if (this.keyword.length > 0) {
                 param.name = this.keyword;
@@ -123,21 +123,17 @@ var projectList = {
                 }
             });
         },
-        hang: function(p, flag) {
-            if (flag) {
-                return;
-            }
-            var flag = parseInt(p.state, 10) === 2,
-                text = flag ? "恢复" : "挂起";
-            if (confirm("确定要" + text + "吗？")) {
-                myPost('../save/projectHang', { 'id': p.id, 'flag': flag ? 1 : 2 }, function(json) {
-                    if (json.code === 200) {
-                        p.state = flag ? 1 : 2;
-                    } else {
-                        alert(json.error);
+        changeState: function(p) {
+            var _this = this;
+            myPost('../save/projectHang', { 'id': p.id, 'flag': p.state }, function(json) {
+                if (json.code === 200) {
+                    if(parseInt(p.state, 10) === 5){
+                        _this.getList(0);
                     }
-                });
-            }
+                } else {
+                    alert(json.error);
+                }
+            });
         },
         change: function(id) {
             this.$parent.next(id, "projectAdd");
@@ -768,10 +764,10 @@ Vue.filter('percentFilter', function(value, total, total2) {
     total2 = total2 ? parseInt(total2, 10) : 0;
     total = total + total2;
     if (total > 0) {
-        return getFixed(value, total, 100, 2) + "%";
+        return getFixed(value, total, 100, 2) + " %";
     }
 
-    return 0 + "%";
+    return 0 + " %";
 });
 
 // ========================myPost===================================

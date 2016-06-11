@@ -1,256 +1,245 @@
 <?php
 namespace app\admin\controller;
 use think\Controller;
+use think\Loader;
 
 class Project extends Controller
 {
     // 问卷完成后的回调
     public function project($s, $p, $u) {
-        $s = $this->setProjectState($p, $s);
-        if(strlen((string)$u) > 11){
-            $Event = \think\Loader::controller("ProjectCompanyExecute",'event');
-            $Event2 = \think\Loader::controller("ProjectCompany",'event');
-            $out = $Event->getUserRecord($p, $u);
-            if($out){
-                $record = $Event2->getByProjectIdAndCompanyId($out['project_id'], $out['company_id']);
-                if($record){
-                    if((int)$s === 2){
-                        $count = $Event->getCompanyStateCount($out['project_id'], $out['company_id'], 2);
-                        if((int)$count  >= (int)$record['amount']){
-                            $s = 5;
-                        }
-                    }
-                }
-                $Event->updateUserRecore($out['id'], $s);                
-                if($record){
-                    $this->redirect($this->getLinkOut($record, $out['company_user_id'], $s));
-                }                
+        $P = Loader::Model('Project');
+        // 判断项目是否合法
+        if($P->where('id', $p)->count() < 1) {
+            $this->assign('img', IMG_PATH);
+            $this->assign('msg', '请勿修改问卷链接，如有问题请及时联系管理员。');
+            return $this->fetch("invalid");
+        }
+
+        if(strlen((string)$u) > 11) {
+            $PME = Loader::Model("ProjectCompanyExecute")->where(['project_id' => $p, 'uuid' => $u])->find();
+            if($PME) {
+                // 记录数据
+                $link = $this->getOutLink($s, $p, $u, $PME, $P->where('id', $p)->find());
+                $this->redirect($link);
+            }else{
+                // 非法用户
+                $this->assign('img', IMG_PATH);
+                $this->assign('msg', '请勿修改问卷链接，如有问题请及时联系管理员。');
+                return $this->fetch("invalid");
             }
         }else{
-            $Event = \think\Loader::controller("AccountProject",'event');
-            $inner = $Event->getUserRecord($p, $u);            
-
-            if((int)$s === 2) {
-                $outCount = \think\Loader::controller("ProjectCompany",'event')->getOutAmount($p);
-                $innerCount = \think\Loader::controller("AccountProject",'event')->getStateCount($p, 2);
-                $arr = \think\Loader::controller("Project",'event')->getById($p);
-                if(count($arr) > 0){
-                    if((int)$innerCount >= ((int)$arr[0]['amount'] - (int)$outCount)){
-                        $s = 5;
-                    }
-                }
+            $this->assign('img', IMG_PATH);
+            // 判断用户是否合法
+            if(Loader::Model('Account')->where('id', $u)->count() < 1) {
+                $this->assign('msg', '请勿修改问卷链接，如有问题请及时联系管理员。');
+                return $this->fetch("invalid");
             }
-            
-            if($inner){
-                $Event->updateUserRecore($inner['id'], $s, $this->getScore($s));
-                $this->assign('img', IMG_PATH);
-                return $this->fetch($s);
-            }
+            // 记录数据
+            $view = $this->getInnerView($s, $p, $u, $P->where('id', $p)->find());
+            return $this->fetch($view);
         }
     }
 
     // 第三方会员点击问卷的回调
     public function outlink($k, $u) {   
-        $Event = \think\Loader::controller("ProjectCompanyExecute",'event');
-        $Event2 = \think\Loader::controller("ProjectCompany",'event');
-        $record = $Event2->getById($k);
-        if($record){
-            if($this->isProjectClose($record['project_id'])){
-                $this->assign('img', IMG_PATH);
-                return $this->fetch("close");
-            }else{
-                $exec = $Event->getUserRecordOut($record['project_id'], $record['company_id'], $u);
-                if($exec){
-                    if((int)$exec['state'] > 1){
+        // 判断项目是否合法
+        $pm = Loader::Model('ProjectCompany')->where('id', $k)->find();
+        if($pm && (Loader::Model('Project')->where('id', $pm->project_id)->count() > 0)) {
+            $uuid = str_replace('-','',\think\Db::query("SELECT UUID() as uuid")[0]);
+            
+            $link = $this->getLink(Loader::Model('Project')->where('id', $pm->project_id)->find(), $uuid['uuid']);
+            if($link){
+                $pme = Loader::Model('ProjectCompanyExecute')->where([
+                    'project_id' => $pm->project_id,
+                    'company_id' => $pm->company_id,
+                    'company_user_id' => $u
+                ])->find();
+                if($pme) {
+                    // 判断用户是否已点击过
+                    if($pme->state > 1){
                         $this->assign('img', IMG_PATH);
                         return $this->fetch("duplicate");
                     }else{
-                        $link = $this->getLink($record['project_id']);
-                        if($link){
-                            $Event->updateStartTime($exec['id']);
-                            if(strpos($link, "?")){
-                                $link = $link."&".PARAM_KEY."=".$exec['uuid'];
-                            }else{
-                                $link = $link."?".PARAM_KEY."=".$exec['uuid'];
-                            }
-                            $this->redirect($link);
-                        }else{
-                            $this->assign('img', IMG_PATH);
-                            return $this->fetch("maintain");
-                        }    
+                        $pme->where('id', $pme->id)->update(['start_time' => date("Y-m-d h:i:s")]);
                     }
-                    
                 }else{
-                    $link = $this->getLink($record['project_id']);
-                    if($link){
-                        $uuid = str_replace('-','',\think\Db::query("SELECT UUID() as uuid")[0]);
-                        $Event->insert([
-                            'uuid' => $uuid['uuid'],
-                            'company_user_id' => $u,
-                            'project_id' => $record['project_id'],
-                            'company_id' => $record['company_id'],
-                            'start_time' => date("Y-m-d h:i:s"),
-                            'finish_time' => date("Y-m-d h:i:s"),
-                            'state' => 1
-                        ]);
-                        if(strpos($link, "?")){
-                            $link = $link."&".PARAM_KEY."=".$uuid['uuid'];
-                        }else{
-                            $link = $link."?".PARAM_KEY."=".$uuid['uuid'];
-                        }
-                        $this->redirect($link);
-                    }else{
-                        $this->assign('img', IMG_PATH);
-                        return $this->fetch("maintain");
-                    }                
+                    // 记录数据
+                    Loader::controller("ProjectCompanyExecute",'event')->insert([
+                        'uuid' => $uuid['uuid'],
+                        'company_user_id' => $u,
+                        'project_id' => $pm->project_id,
+                        'company_id' => $pm->company_id,
+                        'start_time' => date("Y-m-d h:i:s"),
+                        'finish_time' => date("Y-m-d h:i:s"),
+                        'state' => 1
+                    ]);
                 }
-            }
+
+                $this->redirect($link);
+            }else{
+                $this->assign('img', IMG_PATH);
+                return $this->fetch("maintain");
+            } 
         }else{
-            $this->assign('msg', '请勿修改问卷链接，如有问题请及时联系管理员。');
             $this->assign('img', IMG_PATH);
+            $this->assign('msg', '请勿修改问卷链接，如有问题请及时联系管理员。');
             return $this->fetch("invalid");
         }
     }
 
     // 内部会员点击问卷的回调
-    public function innerlink($p, $u) {  
-        if(\think\Loader::controller("Account",'event')->hasUserId($u)) {
-            if(\think\Loader::controller("Project",'event')->isExistId($p)) {
-                if($this->isProjectClose($p)){
-                    $this->assign('img', IMG_PATH);
-                    return $this->fetch("close");
-                }else{
-                    $Event = \think\Loader::controller("AccountProject",'event');
-                    $record = $Event->getUserRecord($p, $u);
-                    if($record){
-                        if((int)$record['state'] > 1){
-                            $this->assign('img', IMG_PATH);
-                            return $this->fetch("duplicate");
-                        }else{
-                            $link = $this->getLink($p);
-                            if($link){
-                                $Event->updateStartTime($record['id']);
-                                if(strpos($link, "?")){
-                                    $link = $link."&".PARAM_KEY."=".$u;
-                                }else{
-                                    $link = $link."?".PARAM_KEY."=".$u;
-                                }
-                                $this->redirect($link);
-                            }else{
-                                $this->assign('img', IMG_PATH);
-                                return $this->fetch("maintain");
-                            }     
-                        }
-                        
-                    }else{
-                        $link = $this->getLink($p);
-                        if($link){
-                            $Event->insert([
-                                'user_id' => $u,
-                                'project_id' => $p,
-                                'start_time' => date("Y-m-d h:i:s"),
-                                'finish_time' => date("Y-m-d h:i:s"),
-                                'state' => 1,
-                                'integral' => 0
-                            ]);
-                            if(strpos($link, "?")){
-                                $link = $link."&".PARAM_KEY."=".$u;
-                            }else{
-                                $link = $link."?".PARAM_KEY."=".$u;
-                            }
-                            $this->redirect($link);
-                        }else{
-                            $this->assign('img', IMG_PATH);
-                            return $this->fetch("maintain");
-                        }     
-                    }
-                }
-            }else{
-                $this->assign('msg', '请勿修改问卷链接，如有问题请及时联系管理员。');
-                $this->assign('img', IMG_PATH);
-                return $this->fetch("invalid");
-            }            
-        }else{
-            $this->assign('msg', '非内部会员，不能参与调查。');
-            $this->assign('img', IMG_PATH);
+    public function innerlink($p, $u) { 
+        $this->assign('img', IMG_PATH);
+        $P = Loader::Model('Project');
+        // 判断项目是否合法
+        if($P->where('id', $p)->count() < 1) {
+            $this->assign('msg', '请勿修改问卷链接，如有问题请及时联系管理员。');
             return $this->fetch("invalid");
         }
-        
+        // 判断用户是否合法  
+        if(Loader::Model('Account')->where('id', $u)->count() < 1) {
+            $this->assign('msg', '非内部会员，不能参与调查。');
+            return $this->fetch("invalid");
+        }      
+        // 判断用户是否已点击过
+        $ap = Loader::Model("AccountProject")->where(['project_id' => $p, 'user_id' => $u])->find();
+        // 判断项目是否在执行
+        $project = $P->where('id', $p)->find();
+        if($project->state > 1) {
+            return $this->fetch("close");
+        }
+
+        $link = $this->getLink($project, $u);
+        if($link){
+            // 记录数据
+            if($ap){
+                if($ap->state > 1){
+                    return $this->fetch("duplicate");
+                }else{
+                    Loader::Model("AccountProject")->where('id', $ap->id)->update(['start_time' => date("Y-m-d h:i:s")]);
+                }
+            }else{
+                Loader::controller("AccountProject",'event')->insert([
+                    'user_id' => $u,
+                    'project_id' => $p,
+                    'start_time' => date("Y-m-d h:i:s"),
+                    'finish_time' => date("Y-m-d h:i:s"),
+                    'state' => 1,
+                    'integral' => 0
+                ]);
+            }
+
+            $this->redirect($link);
+        }else{
+            return $this->fetch("maintain");
+        } 
     }
 
-    // 更新项目状态
-    private function setProjectState($projectId, $s) {
+    // 判断项目调查数量是否完成，完成后更新项目状态
+    private function isCompete($p, $s, $project) {
         if((int)$s === 2){
-            $Event = \think\Loader::controller("Project",'event');
-            $arr = $Event->getById($projectId);
-            if(count($arr) > 0){
-                if($arr[0]['state'] > 1){
-                    $s = 5;
-                }else{
-                    $count1 = \think\Loader::controller("AccountProject",'event')->getStateCount($projectId, 2);
-                    $count2 = \think\Loader::controller("ProjectCompanyExecute",'event')->getStateCount($projectId, 2);
-                    if(($count1 + $count2) >= $arr[0]['amount']){
-                        $Event->update(['id' => $projectId, 'state' => 3]);
-                        $s = 5;
-                    }
-                }                
+            $query = ['project_id' => $p, 'state' => 2];
+            $innerCount = Loader::Model('AccountProject')->where($query)->count();
+            $outCount = Loader::Model('ProjectCompanyExecute')->where($query)->count();
+            if($project->amount === ($innerCount + $outCount)){
+                $project->where('id', $p)->update(['state' => 3]);
+                $s = 5;
             }
         }
+        
+        return $s;;
+    }
+
+    // 获取内部会员问卷完成视图（含状态更新）
+    private function getInnerView($s, $p, $u, $project) 
+    {
+        $ap = Loader::Model('AccountProject');
+        if($project->state < 2) {
+            $s = $this->isCompete($p, $s, $project);
+            if((int)$s === 2) {
+                // 判断内部调查数量是否已完成
+                $innerCount = $ap->where(['project_id' => $p, 'state' => 2])->count();
+                $outAmount = Loader::Model('ProjectCompany')->where('project_id', $p)->sum('amount');
+                if($innerCount >= ($project->amount - $outAmount)){
+                    $s = 5;
+                }
+            }
+        }else{
+            $s = 5;
+        }
+        // 更新状态
+        $record = $ap->where(['project_id' => $p, 'user_id' => $u])->find();
+        $record->where(['id' => $record->id])->update([
+                'state' => $s,
+                'finish_time' => date("Y-m-d h:i:s"),
+                'integral' => $this->getScore($p, $s)
+            ]);       
         return $s;
     }
 
-    // 判断项目是否已结束
-    private function isProjectClose($projectId) {
-        $Event = \think\Loader::controller("Project",'event');
-        $arr = $Event->getById($projectId);
-        if(count($arr) > 0){
-            return $arr[0]['state'] > 1;
+    // 获取外部会员问卷完成跳转链接（含状态更新）
+    private function getOutLink($s, $p, $u, $pme, $project)
+    {
+        $s = $this->isCompete($p, $s, $project);
+        $PM = Loader::Model("ProjectCompany")->where(['project_id' => $p, 'company_id' => $pme->company_id])->find();
+        if($project->state < 2) {
+            if((int)$s === 2) {
+                // 判断外包数量是否已完成
+                $count = Loader::Model("ProjectCompanyExecute")->where([
+                    'project_id' => $p, 
+                    'company_id' => $pme->company_id,
+                    'state' => 2
+                ])->count();
+                if($count >= $PM->amount){
+                    $s = 5;
+                }
+            }
+        }else{
+            $s = 5;
         }
 
-        return true;
+        // 更新状态
+        $pme->where(['id' => $pme->id])->update([
+                'state' => $s,
+                'finish_time' => date("Y-m-d h:i:s")
+            ]);  
+
+        if((int)$s === 2) {
+            return $PM->link_compete;
+        }else if((int)$s === 2){
+            return $PM->link_refuse;
+        }else{
+            return $PM->link_full;
+        }
     }
 
     // 获取问卷地址
-    private function getLink($projectId) {
+    private function getLink($project, $u) {
         $link = null;
-        $Event = \think\Loader::controller("Project",'event');
-        $arr = $Event->getById($projectId);
-        if(count($arr) > 0){
-            $project = $arr[0];
-            if((int)$project['is_muilty_link'] > 0){
-                $Event2 = \think\Loader::controller("ProjectLink",'event');
-                $brr = $Event2->getEnableLink($projectId);
-                if(count($brr) > 0){
-                    $link = $brr[0]['link'];
-                    $Event2->update($brr[0]['id']);
-                }
+        if((int)$project['is_muilty_link'] > 0){
+            $Event2 = \think\Loader::controller("ProjectLink",'event');
+            $brr = $Event2->getEnableLink($project->id);
+            if(count($brr) > 0){
+                $link = $brr[0]['link'];
+                $Event2->update($brr[0]['id']);
+            }
+        }else{
+            $link = $project['link'];
+        }
+
+        if($link) {
+            $link = trim($link);
+            if(strpos($link, "?")){
+                $link = $link."&".PARAM_KEY."=".$u;
             }else{
-                $link = $project['link'];
+                $link = $link."?".PARAM_KEY."=".$u;
             }
         }
-        return trim($link);
+        
+        return $link;
     }
 
-    // 获取第三方的回调地址
-    private function getLinkOut($record, $uid, $s) {
-        switch ((int)$s) {
-            case 2:
-                $link = $record['link_compete'].$uid;
-                break; 
-            case 3:
-                $link = $record['link_refuse'].$uid;
-                break; 
-            case 4:
-                $link = $record['link_full'].$uid;
-                break;            
-            default:
-                $link = $record['link_full'].$uid;
-                break;
-        }
-        return trim($link);
-    }
-
-    private function getScore($s) {
+    private function getScore($p, $s) {
         $score = 10;
         if((int)$s === 2){
             // TODO

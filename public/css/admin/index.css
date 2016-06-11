@@ -61,22 +61,22 @@
 }
 
 .ihq-projects .time {
-    width: 100px;
+    width: 70px;
     text-align: center;
 }
 
 .ihq-projects .type {
-    width: 90px;
+    width: 60px;
     text-align: center;
 }
 
 .ihq-projects .start {
-    width: 90px;
+    width: 8;
     text-align: center;
 }
 
 .ihq-projects .end {
-    width: 90px;
+    width: 70px;
     text-align: center;
 }
 
@@ -90,8 +90,13 @@
     background-color: rgba(0, 100, 0, .2);
 }
 
+.ihq-projects .calc {
+    width: 40px;
+    text-align: center;
+}
+
 .ihq-projects .op {
-    width: 200px;
+    width: 160px;
     text-align: center;
 }
 
