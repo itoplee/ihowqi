@@ -50,6 +50,11 @@ var paginate = {
             }
 
         }
+    },
+    events: {
+        reset: function () {
+            this.first();
+        }
     }
 };
 // ========================项目报表（所有项目）=============================================
@@ -143,6 +148,9 @@ var projectList = {
         },
         process: function(id) {
             this.$parent.next(id, "projectProcess");
+        },
+        links: function (id) {
+            this.$parent.next(id, "projectLink");
         },
         delete: function(id, flag) {
             var _this = this;
@@ -749,6 +757,86 @@ var projectCompany = {
     }
 };
 
+// ========================问卷地址=============================================
+var projectLink = {
+    template: '#project-link',
+    data: function() {
+        return {
+            list: [],
+            keyword: "",
+            name: "",
+            versions: [],
+            version: 1,
+            pageRowCount: 10,
+            total: 0
+        };
+    },
+    methods: {
+        back: function() {
+            this.$parent.back();
+        },
+        changeVersion: function () {
+            this.$broadcast('reset');
+            this.getList(0);
+        },
+        getList: function(index) {
+            var _this = this,
+                param = {'id': this.$parent.projectId, page: index, rowCount: _this.pageRowCount};
+            if(parseInt(this.version, 10) > 0){
+                param.version = parseInt(this.version, 10);
+            }
+            myPost('../get/searchLinks', param, function (json) {
+                if (json.code === 200) {
+                    _this.list = json.data.list;
+                    _this.total = json.data.rowCount;
+                } else {
+                    alert(json.error);
+                }
+            });
+        },
+        getLinkVersion: function () {
+            var _this = this;
+            myPost('../get/getLinkVersion', {'id': this.$parent.projectId}, function (json) {
+                if (json.code === 200) {
+                    _this.versions = [{id: 0, name: "请选择导入批次"}];
+                    json.data.map(function (v) {
+                        _this.versions.push({id: v.version, name: "第 " + v.version + " 批"});
+                    });
+                } else {
+                    alert(json.error);
+                }
+            });
+        },
+        enableAll: function () {
+            var _this = this;
+            myPost('../save/updateProjectLinkByVersion', {'id': this.$parent.projectId, 'version': this.version}, function (json) {
+                if (json.code === 200) {
+                    _this.getList(0);
+                } else {
+                    alert(json.error);
+                }
+            });
+        },
+        enableOne: function (id, isDel) {
+            var _this = this, val = parseInt(isDel, 10) === 1 ? 0 : 1;
+            myPost('../save/updateProjectLinkById', {'id': id, 'val': val}, function (json) {
+                if (json.code === 200) {
+                    _this.getList(0);
+                } else {
+                    alert(json.error);
+                }
+            });
+        }
+    },
+    components: {
+        "paginate": paginate
+    },
+    ready: function() {
+        this.getList(0);
+        this.getLinkVersion();
+    }
+};
+
 // ========================filter=============================================
 Vue.filter('timeFilter', function(value) {
     return (value / 60).toFixed(2);
@@ -897,6 +985,7 @@ new Vue({
         "projectCompany": projectCompany,
         "projectOutsource": projectOutsource,
         "projectProcess": projectProcess,
-        "projectChartOne": projectChartOne
+        "projectChartOne": projectChartOne,
+        "projectLink": projectLink
     }
 });

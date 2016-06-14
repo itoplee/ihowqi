@@ -44,8 +44,9 @@ class Save extends Http
                 $arr = $this->readFile(ROOT_PATH.'/public/upload/'.date("Y-m-d").'/'.$_POST['fileName']);
                 $count = count($arr);
                 if($count > 0) {
+                    $version = $this->getEvent("ProjectLink")->getMaxVersion($projectId) + 1;
                     for($i=0; $i<$count; $i++) {
-                        $this->getEvent("ProjectLink")->insert($projectId, trim($arr[$i]));
+                        $this->getEvent("ProjectLink")->insert($projectId, trim($arr[$i]), $version);
                     }
                 }
             }
@@ -175,6 +176,35 @@ class Save extends Http
         $Event = \think\Loader::controller('Company','event');
         $Event->update($_POST['id'], trim($_POST['name']), trim($_POST['compete']), trim($_POST['refuse']), trim($_POST['full']));
         return new HttpResult(null);
+    }
+
+     // 禁用整批次问卷地址
+    public function updateProjectLinkByVersion() {
+        if($this->loginCheck()) {
+            return $this->timeout();
+        }
+
+        $Event = \think\Loader::controller('ProjectLink','event');
+        $Event->enableLink([
+            'project_id' => $_POST['id'], 
+            'version' => $_POST['version'],
+            'used' => 1,
+            'is_delete' => 0
+        ], 1);
+        $result = new HttpResult(null);
+        return $result;
+    }
+
+     // 禁用或恢复指定问卷地址
+    public function updateProjectLinkById() {
+        if($this->loginCheck()) {
+            return $this->timeout();
+        }
+
+        $Event = \think\Loader::controller('ProjectLink','event');
+        $Event->enableLink(['id' => $_POST['id']], $_POST['val']);
+        $result = new HttpResult(null);
+        return $result;
     }
 
     private function readFile($file_name) {

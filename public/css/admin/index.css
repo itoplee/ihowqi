@@ -96,7 +96,7 @@
 }
 
 .ihq-projects .op {
-    width: 160px;
+    width: 185px;
     text-align: center;
 }
 
@@ -483,4 +483,15 @@
 
 .ihq-project-score .icon-menu {
     margin-left: 0;
+}
+
+/* ihq-link */
+.ihq-link {
+    margin: 10px;
+}
+
+.ihq-link-enable {
+    color: #2db7f5;
+    margin-left: 10px;
+    cursor: pointer;
 }

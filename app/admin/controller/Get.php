@@ -203,6 +203,43 @@ class Get extends Http
         return new HttpResult(['uuid' => $this->uuid()['uuid']]); 
     }
 
+    // 获取问卷链接
+    public function searchLinks() 
+    {
+        if($this->loginCheck()) {
+            return $this->timeout();
+        }
+
+        $map['project_id'] = $_POST['id'];
+        if(Input('post.used')){
+           $map['used'] = $_POST['used'];
+        }
+
+        if(Input('post.deleted')){
+           $map['is_delete'] = $_POST['deleted'];
+        }
+
+        if(Input('post.version')){
+           $map['version'] = $_POST['version'];
+        }
+
+        $Event = \think\Loader::controller('ProjectLink','event'); 
+        $data['list'] = $Event->getLinks($map, $_POST['page'], $_POST['rowCount']);
+        $data['rowCount'] = $Event->getLinksTotal($map);
+        return new HttpResult($data); 
+    }
+
+    // 获取问卷导入批次
+    public function getLinkVersion() 
+    {
+        if($this->loginCheck()) {
+            return $this->timeout();
+        }
+
+        $Event = \think\Loader::controller('ProjectLink','event'); 
+        return new HttpResult($Event->getVersion($_POST['id'])); 
+    }
+
     private function getUseTimeDiff($arr, $brr) 
     {
         $data = ['min' => 0, 'max' => 0, 'avg' => 0, 'sum' => 0, 'total' => 0, 'loi' => 0];

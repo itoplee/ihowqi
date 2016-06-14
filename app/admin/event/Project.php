@@ -7,7 +7,7 @@ class Project
 	public function getAll($start, $count, $map)
     {    	
         return db("project")
-            ->field('a.id,a.name,use_time,start_time,end_time,link,amount,state,w.name as type_name')
+            ->field('a.id,a.name,use_time,start_time,end_time,link,amount,state,is_muilty_link,w.name as type_name')
             ->alias('a')
             ->join('project_type w','type_id = w.id')
             ->where($map)
@@ -19,7 +19,7 @@ class Project
     public function getFinishAll($start, $count, $map)
     {    
         return db("project")
-            ->field('a.id,a.name,use_time,start_time,end_time,link,amount,state,w.name as type_name')
+            ->field('a.id,a.name,use_time,start_time,end_time,link,amount,state,is_muilty_link,w.name as type_name')
             ->alias('a')
             ->join('project_type w','type_id = w.id')
             ->where($map)

@@ -95,6 +95,7 @@
                             <a @click="process(p.id)">详情</a>
                             <a @click="change(p.id)">修改</a>
                             <a @click="outsource(p.id)">外包</a>
+                            <a @click="links(p.id)" :class="{'enable': parseInt(p.is_muilty_link,10) < 1}">问卷</a>
                             <a class="delete" @click="delete(p.id, parseInt(p.state,10) > 0)" :class="{'enable': parseInt(p.state,10) > 0}">删除</a>
                         </td>
                     </tr>
@@ -492,6 +493,43 @@
                 </tbody>
             </table>
             <div class="ihq-paginate-empty" v-show="list.length < 1">没有记录</div>
+        </div>
+    </div>
+</template>
+<!-- 问卷地址 -->
+<template id="project-link">
+    <div>
+        <div class="ihq-con-b-topbar">
+            <span class="h5-back" @click="back"><i class="icon-menu">&#xe608;</i>返回</span>
+            <label class="h5-label">问卷地址</label>
+        </div>
+        <div class="ihq-link">
+            <select v-model="version" @change="changeVersion">
+                <option v-for="v in versions" value="{{v.id}}">{{v.name}}</option>
+            </select>
+            <span class="ihq-link-enable" @click="enableAll" v-show="parseInt(version, 10) > 0">第 {{version}} 批全部禁用</span>
+            <div style="height: 10px;"></div>
+            <table class="ihq-projects">
+                <thead>
+                    <tr>
+                        <td class="odd name">问卷地址</td>
+                        <td class="odd time">导入批次</td>
+                        <td class="odd time">使用状态</td>
+                        <td class="odd op op2">操作</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="p in list">
+                        <td class="name" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.link}}</td>
+                        <td class="type" :class="{'odd': (($index + 1) % 2 === 0)}">{{p.version}}</td>
+                        <td class="type" :class="{'odd': (($index + 1) % 2 === 0)}">{{parseInt(p.used, 10) === 1 ? "未使用" : "已使用"}}</td>
+                        <td class="op op2" :class="{'odd': (($index + 1) % 2 === 0)}">
+                            <a @click="enableOne(p.id, p.is_delete)" :class="{'enable': parseInt(p.used, 10) === 0}">{{parseInt(p.is_delete, 10) === 0 ? "恢复" : "禁用"}}</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <paginate :index="0" :row="pageRowCount" :total="total"></paginate>
         </div>
     </div>
 </template>
