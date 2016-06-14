@@ -205,11 +205,11 @@ class Project extends Controller
             ]);  
 
         if((int)$s === 2) {
-            return $PM->link_compete;
+            return $PM->link_compete.$pme->company_user_id;
         }else if((int)$s === 2){
-            return $PM->link_refuse;
+            return $PM->link_refuse.$pme->company_user_id;
         }else{
-            return $PM->link_full;
+            return $PM->link_full.$pme->company_user_id;
         }
     }
 
