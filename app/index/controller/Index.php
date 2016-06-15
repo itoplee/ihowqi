@@ -2,14 +2,13 @@
 namespace app\index\controller;
 use think\Controller;
 
-class Index 
+class Index extends Controller
 {
     public function index()
     {    
-        return "index:";
+    	$this->assign('css', CSS_PATH);
+    	$this->assign('js', JS_PATH);
+        return $this->fetch();
     }
 
-   public function hello() {
-   	echo "hello";
-   }
 }

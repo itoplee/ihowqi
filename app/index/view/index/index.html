@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>爱好奇管理平台</title>
-	<link rel="stylesheet" href="{$css}/reset.css">
-	<link rel="stylesheet" href="{$css}/animate.min.css">
-	<link rel="stylesheet" href="{$css}/admin/common.css">
+	<title>爱好奇-不仅仅是调查</title>
+    <link rel="stylesheet" href="{$css}/reset.css">
 </head>
 <body>
-	<div id="app"></div>
-	<script type="text/javascript" src="{$js}/lib/react/react.min.js"></script>
-	<script type="text/javascript" src="{$js}/lib/react/react-dom.min.js"></script>
-	<script type="text/javascript" src="{$js}/lib/react/browser.min.js"></script>
-	<script type="text/babel" src="{$js}/app/admin/index.js"></script>
+	<div id="app">
+		<iheader></iheader>
+		<ibanner></ibanner>
+		<ifooter></ifooter>
+	</div>
+
+	<script src="{$js}/lib/jquery-2.2.4.min.js" type="text/javascript"></script>
+	<script src="{$js}/lib/vue.min.js" type="text/javascript"></script>
+	<script src="{$js}/app/index.js" type="text/javascript"></script>
 </body>
 </html>
