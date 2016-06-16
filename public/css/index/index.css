@@ -1,0 +1,186 @@
+/* 在线图标 */
+@font-face {
+  font-family: 'iconfont';
+  src: url('//at.alicdn.com/t/font_1466086617_2812903.eot'); /* IE9*/
+  src: url('//at.alicdn.com/t/font_1466086617_2812903.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('//at.alicdn.com/t/font_1466086617_2812903.woff') format('woff'), /* chrome、firefox */
+  url('//at.alicdn.com/t/font_1466086617_2812903.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+  url('//at.alicdn.com/t/font_1466086617_2812903.svg#iconfont') format('svg'); /* iOS 4.1- */
+}                 
+
+.ihq-statistics {
+	width: 1000px;
+	margin: 20px auto;
+	overflow: hidden;
+}
+
+.ihq-statistics .item {
+	float: left;
+	width: 180px;
+	height: 60px;
+	border: 0;
+	border-radius: 10px 0 10px 0;
+	color: #fff;
+	text-align: center;
+	margin-left: 55px;
+	padding-top: 8px;
+	line-height: 24px;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.ihq-statistics .join {
+	background-color: rgb(112, 170, 73);
+}
+
+.ihq-statistics .partin {
+	background-color: rgb(237, 124, 48);
+}
+
+.ihq-statistics .seal {
+	background-color: rgb(68, 114, 197);
+}
+
+.ihq-statistics .arrow {
+	float: left;
+	width: 50px;
+	margin-left: 55px;
+	margin-top: 24px;
+	color: #999;
+}
+
+.ihq-statistics .arrow .icon {
+	font-family: "iconfont";
+	font-size: 30px;
+	font-style: normal;
+}
+
+.ihq-company {
+	overflow: hidden;
+	width: 900px;
+	margin: 20px auto;
+}
+
+.ihq-company .item {
+	float: left;
+	width: 100px;
+	height: 100px;
+	transition: all .3s;
+}
+
+.ihq-company .item .icon {
+	font-family: "iconfont";
+	font-size: 96px;
+	font-style: normal;
+	color: #666;
+	transition: all .3s;
+}
+
+.ihq-company .item + .item {
+	margin-left: 26px;
+}
+
+.ihq-company .zfb {}
+.ihq-company .zfb .icon {}
+.ihq-company .zfb:hover {
+	transform: rotate(360deg);
+}
+.ihq-company .zfb:hover .icon {
+	color: rgb(86, 171, 229);
+}
+
+.ihq-company .wx {}
+.ihq-company .wx .icon {}
+.ihq-company .wx:hover {
+	transform: rotate(360deg);
+}
+.ihq-company .wx:hover .icon {
+	color: rgb(16, 205, 110);
+}
+
+.ihq-company .jd {
+	border: 3px solid #666;
+    border-radius: 50%;
+    padding-top: 10px;
+    padding-left: 12px;
+    width: 83px;
+    height: 83px;
+    margin-top: 4px;
+}
+.ihq-company .jd .icon {
+	font-size: 77px;
+}
+.ihq-company .jd:hover {
+	border-color: rgb(236, 78, 56);
+	transform: rotate(360deg);
+}
+.ihq-company .jd:hover .icon {
+	color: rgb(236, 78, 56);
+}
+
+.ihq-company .yd {
+	margin-top: 1px;
+    height: 110px;
+    width: 110px;
+}
+.ihq-company .yd .icon {
+	font-size: 114px;
+}
+.ihq-company .yd:hover {
+	transform: rotate(360deg);
+}
+.ihq-company .yd:hover .icon {
+	color: rgb(86, 171, 229);
+}
+
+.ihq-company .ymx {
+	border: 2px solid #666;
+    border-radius: 50%;
+    margin-top: 5px;
+    width: 94px;
+    height: 94px;
+}
+.ihq-company .ymx .icon {
+	font-size: 90px;
+    display: block;
+}
+.ihq-company .ymx:hover {
+	border-color: rgb(239, 128, 11);
+	transform: rotate(360deg);
+}
+.ihq-company .ymx:hover .icon {
+	color: rgb(239, 128, 11);
+}
+
+.ihq-company .lt {    
+	margin-top: -5px;
+}
+.ihq-company .lt .icon {
+	font-size: 110px;
+}
+.ihq-company .lt:hover {
+	transform: rotate(360deg);
+}
+.ihq-company .lt:hover .icon {
+	color: rgb(236, 78, 56);
+}
+
+.ihq-company .dd {
+	border: 2px solid #666;
+    border-radius: 50%;
+    width: 95px;
+    height: 95px;
+    margin-top: 1px;
+}
+.ihq-company .dd .icon {
+	display: block;
+    margin-top: 7px;
+}
+.ihq-company .dd:hover {
+	border-color: rgb(236, 78, 56);
+	transform: rotate(360deg);
+}
+
+.ihq-company .dd:hover .icon {
+	color: rgb(236, 78, 56);
+}
