@@ -21,7 +21,6 @@
 		position: fixed;
 		top: 0;
 		left: 0;
-		z-index: 50;
 		width: 100%;
 		height: 60px;
 		border-bottom: 1px solid #ccc;

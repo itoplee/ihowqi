@@ -2,13 +2,33 @@
 	export default {
 		data: function () {
 			return {
-				type: 1
+				type: 1,
+				qquri : encodeURIComponent("http://www.itoplee.com/ihowqi/index.php/index/index/qqlogin"),
+				baiduuri : encodeURIComponent("http://www.itoplee.com/ihowqi/index.php/index/index/baiduLogin")
 			};
 		},
 		methods: {
 			change: function (index) {
 				this.type = index;
 			}
+		},
+		ready: function () {
+			//https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101327498&redirect_uri=[YOUR_REDIRECT_URI]&scope=123
+			//28CFA2E50896A4CE21AA84FEAC953DFB
+			WB2.anyWhere(function(W){
+			    W.widget.connectButton({
+			        id: "wb_connect_btn",	
+			        type:"3,4",
+			        callback : {
+			            login:function(o){	//登录后的回调函数
+			            	 alert("login: " + o.screen_name);
+			            },	
+			            logout:function(){	//退出后的回调函数
+			            	 alert('logout');
+			            }
+			        }
+			    });
+			});
 		}
 	};
 </script>
@@ -17,7 +37,7 @@
 		<div class="box">
 			<div class="tab">
 				<span @click="change(1)" :class="{'left': type === 2}">爱好奇登录</span>
-				<span @click="change(2)" :class="{'right': type === 1}">二维码快速登陆</span>
+				<span :class="{'right': type === 1}">二维码快速登陆</span>
 			</div>
 			<dl class="dl" v-show="type === 1">
 				<dt>用户名：</dt>
@@ -31,8 +51,18 @@
 				<span>登录</span>
 				<a href="#">忘记密码</a>
 			</div>
-			<a href="#" class="register" v-show="type === 1"></a>
-			<img class="code" src="../../../public/imgs/code.png" v-show="type === 2"/>
+			<!-- <a href="#" class="register" v-show="type === 1"></a> -->
+			<div class="other" v-show="type === 1">
+				<label class="label">其他账号登录：</label>
+				<a href="https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101327498&redirect_uri={{qquri}}&scope=123">
+					<img src="../../../public/imgs/Connect_logo_7.png" alt="qq">
+				</a>
+				<a href="http://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=e1gGLs0wZKDjqRysUHnzAGMt&redirect_uri={{baiduuri}}">
+					<img src="../../../public/imgs/baidu.png" alt="baidu">
+				</a>
+				<div id="wb_connect_btn" style="float: left; margin-right: 5px;"></div>
+			</div>
+			<div class="code" id="qrcode" v-show="type === 2"></div>
 		</div>
 	</div>
 </template>
@@ -155,9 +185,20 @@
 		    top: 265px;
 		}
 
+		.other {
+			margin-top: 30px;
+    		margin-left: 20px;
+    		overflow: hidden;
+
+    		.label {
+    			float: left;
+    			margin-top: 6px;
+    		}
+		}
+
 		.code {
-			width: 240px;
-			margin: 40px 30px 0px;
+			width: 200px;
+			margin: 30px auto 0;
 		}
 	}
 </style>
